@@ -1,0 +1,19 @@
+import mongoose from 'mongoose';
+
+const matchSchema = new mongoose.Schema({
+  team1: String,
+  team2: String,
+  totalOvers: Number,
+  oversPerSkin: Number,
+  status: {
+    type: String,
+    enum: ['ongoing', 'completed'],
+    default: 'ongoing'
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+export default mongoose.model('Match', matchSchema);
