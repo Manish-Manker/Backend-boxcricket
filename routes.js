@@ -229,4 +229,23 @@ router.post('/teamdata/:matchId', authenticateToken, async (req, res) => {
     }
 });
 
+router.get('/userwisematch', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const userMatches = await Match.find({ userId });
+        res.json({ 
+            status: 200, 
+            message: "User-wise matches fetched successfully", 
+            data: userMatches 
+        });
+    } catch (error) {
+        console.error("Error fetching user-wise matches:", error);
+        res.status(500).json({ 
+            status: 500, 
+            message: "Error fetching user-wise matches", 
+            error: error.message 
+        });
+    }
+});
+
 export default router;

@@ -1,6 +1,10 @@
 import mongoose from 'mongoose';
 
 const matchSchema = new mongoose.Schema({
+  userId:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
   team1: String,
   team2: String,
   totalOvers: Number,
