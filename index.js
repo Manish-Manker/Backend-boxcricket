@@ -36,7 +36,7 @@ try {
 // Routes
 app.use('/api', routes);
 
-// Global error handling middleware
+// Global error handling middleware 
 app.use((err, req, res, next) => {
     console.log("globel error----------------");
     console.error('Error occurred:', err);

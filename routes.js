@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import Match from './models/Match.js';
 import TeamData from './models/TeamData.js';
 import User from './models/User.js';
-
+import PlayerName from './models/PlayerName.js';
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -232,7 +232,7 @@ router.post('/teamdata/:matchId', authenticateToken, async (req, res) => {
 router.get('/userwisematch', authenticateToken, async (req, res) => {
     try {
         const userId = req.user._id;
-        const userMatches = await Match.find({ userId });
+        const userMatches = await Match.find({ userId }).sort({ createdAt: -1 }); 
         res.json({ 
             status: 200, 
             message: "User-wise matches fetched successfully", 
@@ -243,6 +243,61 @@ router.get('/userwisematch', authenticateToken, async (req, res) => {
         res.status(500).json({ 
             status: 500, 
             message: "Error fetching user-wise matches", 
+            error: error.message 
+        });
+    }
+});
+
+router.post('/playername', authenticateToken, async (req, res) => {
+    try {
+        let userId = req.user._id;
+        let newPlayerName = req.body.playerNames;
+
+        const playerNames = await PlayerName.findOne({ userId });
+
+        if (!playerNames) {
+            let NewplayerName = new PlayerName({ 
+                userId, 
+                playerName: [newPlayerName] 
+            });
+            await NewplayerName.save();
+        }else{
+            playerNames.playerName.push(newPlayerName);
+            await playerNames.save();
+        }
+
+        res.json({ 
+            status: 200, 
+            message: "Player names saved successfully"
+        });
+    } catch (error) {
+        console.error("Error saving player names:", error);
+        res.status(500).json({ 
+            status: 500, 
+            message: "Error saving player names", 
+            error: error.message 
+        });
+    }
+}); 
+
+router.get('/playername', authenticateToken, async (req, res) => {
+    try {
+        let userId = req.user._id;
+        const playerNames = await PlayerName.findOne({ userId });
+        
+        console.log(playerNames);
+        
+        let data = playerNames?.playerName || [];
+        res.json({ 
+            status: 200, 
+            message: "Player names fetched successfully", 
+            data
+        });
+    } catch (error) {
+        console.error("Error fetching player names:", error);
+        res.status(500).json({ 
+            status: 500, 
+            message: "Error fetching player names", 
             error: error.message 
         });
     }
