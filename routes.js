@@ -14,18 +14,18 @@ const authenticateToken = async (req, res, next) => {
         const token = authHeader && authHeader.split(' ')[1];
 
         if (!token) {
-            return res.status(401).json({ 
-                status: 401, 
+            return res.status(401).json({
+                status: 401,
                 message: 'Authentication required'
             });
         }
 
         const decoded = jwt.verify(token, JWT_SECRET);
         const user = await User.findById(decoded.userId);
-        
+
         if (!user) {
-            return res.status(401).json({ 
-                status: 401, 
+            return res.status(401).json({
+                status: 401,
                 message: 'User not found'
             });
         }
@@ -33,8 +33,8 @@ const authenticateToken = async (req, res, next) => {
         req.user = user;
         next();
     } catch (error) {
-        return res.status(403).json({ 
-            status: 403, 
+        return res.status(403).json({
+            status: 403,
             message: 'Invalid or expired token'
         });
     }
@@ -44,7 +44,7 @@ const authenticateToken = async (req, res, next) => {
 router.post('/signup', async (req, res) => {
     try {
         const { name, email, password } = req.body;
-        
+
         if (!email || !password || !name) {
             return res.status(400).json({
                 status: 400,
@@ -54,8 +54,8 @@ router.post('/signup', async (req, res) => {
 
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return res.status(400).json({ 
-                status: 400, 
+            return res.status(400).json({
+                status: 400,
                 message: 'User already exists with this email'
             });
         }
@@ -63,14 +63,14 @@ router.post('/signup', async (req, res) => {
         const user = new User({ name, email, password });
         await user.save();
 
-        res.status(201).json({ 
-            status: 201, 
+        res.status(201).json({
+            status: 201,
             message: 'User created successfully'
         });
     } catch (error) {
         console.error('Signup error:', error);
-        res.status(500).json({ 
-            status: 500, 
+        res.status(500).json({
+            status: 500,
             message: 'Error creating user',
             error: error.message
         });
@@ -90,8 +90,8 @@ router.post('/login', async (req, res) => {
 
         const user = await User.findOne({ email });
         if (!user || !(await user.comparePassword(password))) {
-            return res.status(401).json({ 
-                status: 401, 
+            return res.status(401).json({
+                status: 401,
                 message: 'Invalid email or password'
             });
         }
@@ -114,8 +114,8 @@ router.post('/login', async (req, res) => {
         });
     } catch (error) {
         console.error('Login error:', error);
-        res.status(500).json({ 
-            status: 500, 
+        res.status(500).json({
+            status: 500,
             message: 'Error during login',
             error: error.message
         });
@@ -127,21 +127,21 @@ router.post('/match', authenticateToken, async (req, res) => {
     try {
         const match = new Match({
             ...req.body,
-            userId: req.user._id  
+            userId: req.user._id
         });
 
         await match.save();
-        res.status(201).json({ 
-            status: 201, 
-            message: "Match created successfully", 
-            data: match 
+        res.status(201).json({
+            status: 201,
+            message: "Match created successfully",
+            data: match
         });
     } catch (error) {
         console.error("Match creation error:", error);
-        res.status(400).json({ 
-            status: 400, 
-            message: "Match creation failed", 
-            error: error.message 
+        res.status(400).json({
+            status: 400,
+            message: "Match creation failed",
+            error: error.message
         });
     }
 });
@@ -149,11 +149,11 @@ router.post('/match', authenticateToken, async (req, res) => {
 router.get('/match/:matchId', authenticateToken, async (req, res) => {
     try {
         const { matchId } = req.params;
-        
+
         if (!matchId) {
-            return res.status(400).json({ 
-                status: 400, 
-                message: "Match ID is required" 
+            return res.status(400).json({
+                status: 400,
+                message: "Match ID is required"
             });
         }
 
@@ -178,11 +178,11 @@ router.get('/match/:matchId', authenticateToken, async (req, res) => {
             }
         });
     } catch (error) {
-        console.error("Error fetching match:", error);        
-        res.status(500).json({ 
-            status: 500, 
+        console.error("Error fetching match:", error);
+        res.status(500).json({
+            status: 500,
             message: "Error fetching match data",
-            error: error.message 
+            error: error.message
         });
     }
 });
@@ -194,17 +194,17 @@ router.post('/teamdata/:matchId', authenticateToken, async (req, res) => {
         const { teamNumber, data } = req.body;
 
         if (!matchId || !teamNumber || !data) {
-            return res.status(400).json({ 
-                status: 400, 
+            return res.status(400).json({
+                status: 400,
                 message: "Match ID, Team Number and Data are required"
             });
         }
 
         let teamData = await TeamData.findOne({ matchId, teamNumber });
         if (!teamData) {
-            teamData = new TeamData({ 
-                matchId, 
-                teamNumber, 
+            teamData = new TeamData({
+                matchId,
+                teamNumber,
                 data,
                 userId: req.user._id  // Associate team data with user
             });
@@ -214,17 +214,17 @@ router.post('/teamdata/:matchId', authenticateToken, async (req, res) => {
         }
 
         await teamData.save();
-        res.json({ 
-            status: 200, 
-            message: "Team data updated successfully", 
-            data: teamData 
+        res.json({
+            status: 200,
+            message: "Team data updated successfully",
+            data: teamData
         });
     } catch (error) {
         console.error("Team data update error:", error);
-        res.status(500).json({ 
-            status: 500, 
-            message: "Team data update failed", 
-            error: error.message 
+        res.status(500).json({
+            status: 500,
+            message: "Team data update failed",
+            error: error.message
         });
     }
 });
@@ -232,23 +232,24 @@ router.post('/teamdata/:matchId', authenticateToken, async (req, res) => {
 router.get('/userwisematch', authenticateToken, async (req, res) => {
     try {
         const userId = req.user._id;
-        const userMatches = await Match.find({ userId }).sort({ createdAt: -1 }); 
-        res.json({ 
-            status: 200, 
-            message: "User-wise matches fetched successfully", 
-            data: userMatches 
+        const userMatches = await Match.find({ userId }).sort({ createdAt: -1 });
+        res.json({
+            status: 200,
+            message: "User-wise matches fetched successfully",
+            data: userMatches
         });
     } catch (error) {
         console.error("Error fetching user-wise matches:", error);
-        res.status(500).json({ 
-            status: 500, 
-            message: "Error fetching user-wise matches", 
-            error: error.message 
+        res.status(500).json({
+            status: 500,
+            message: "Error fetching user-wise matches",
+            error: error.message
         });
     }
 });
 
 router.post('/playername', authenticateToken, async (req, res) => {
+
     try {
         let userId = req.user._id;
         let newPlayerName = req.body.playerNames;
@@ -256,51 +257,86 @@ router.post('/playername', authenticateToken, async (req, res) => {
         const playerNames = await PlayerName.findOne({ userId });
 
         if (!playerNames) {
-            let NewplayerName = new PlayerName({ 
-                userId, 
-                playerName: [newPlayerName] 
+            let NewplayerName = new PlayerName({
+                userId,
+                playerName: [newPlayerName]
             });
             await NewplayerName.save();
-        }else{
+        } else {
             playerNames.playerName.push(newPlayerName);
             await playerNames.save();
         }
 
-        res.json({ 
-            status: 200, 
+        res.json({
+            status: 200,
             message: "Player names saved successfully"
         });
     } catch (error) {
         console.error("Error saving player names:", error);
-        res.status(500).json({ 
-            status: 500, 
-            message: "Error saving player names", 
-            error: error.message 
+        res.status(500).json({
+            status: 500,
+            message: "Error saving player names",
+            error: error.message
         });
     }
-}); 
+});
 
 router.get('/playername', authenticateToken, async (req, res) => {
     try {
         let userId = req.user._id;
         const playerNames = await PlayerName.findOne({ userId });
-        
+
         console.log(playerNames);
-        
+
         let data = playerNames?.playerName || [];
-        res.json({ 
-            status: 200, 
-            message: "Player names fetched successfully", 
+        res.json({
+            status: 200,
+            message: "Player names fetched successfully",
             data
         });
     } catch (error) {
         console.error("Error fetching player names:", error);
-        res.status(500).json({ 
-            status: 500, 
-            message: "Error fetching player names", 
-            error: error.message 
+        res.status(500).json({
+            status: 500,
+            message: "Error fetching player names",
+            error: error.message
         });
     }
 });
+
+
+router.put('/chnageStatus', authenticateToken, async (req, res) => {
+    try {
+        let userId = req.user._id;
+        let status = req.body.status;
+        let matchId = req.body.matchId;
+
+        let match = await Match.findOne({ userId, _id: matchId });
+        if (match && match.status) {
+            match.status = status;
+
+            await match.save();
+            let data = await Match.findOne({ userId });
+
+            res.status(200).json({
+                status: 200,
+                message: "Status changed successfully"
+            });
+        }else{
+            res.status(404).json({
+                status: 404,
+                message: "Match not found"
+            });
+        }
+
+    } catch (error) {
+        console.error("Error :", error);
+        res.status(500).json({
+            status: 500,
+            message: "Internal Server Error",
+            error: error.message
+        });
+    }
+})
 
 export default router;

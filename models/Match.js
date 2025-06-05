@@ -11,7 +11,7 @@ const matchSchema = new mongoose.Schema({
   oversPerSkin: Number,
   status: {
     type: String,
-    enum: ['ongoing', 'completed'],
+    enum: ['ongoing', 'completed','cancel'],
     default: 'ongoing'
   },
   createdAt: {
