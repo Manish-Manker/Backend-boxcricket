@@ -14,7 +14,7 @@ import {
     changeStatus
 } from './controller/MatchController.js'
 
-import { getAllUsers, activeInactiveUser, editUser } from './controller/AdminController.js'
+import { getAllUsers, activeInactiveUser, editUser , UserMatchData } from './controller/AdminController.js'
 
 // user routes
 router.post('/signup', signup);
@@ -30,7 +30,7 @@ router.post('/teamdata/:matchId', authenticateToken, saveteamdata);
 
 router.get('/userwisematch', authenticateToken, getUserwiseMatch);
 
-router.post('/playername', authenticateToken, savePlayerName);
+router.post('/playername', authenticateToken, savePlayerName);  
 
 router.get('/playername', authenticateToken, getPlayerName);
 
@@ -41,5 +41,6 @@ router.put('/chnageStatus', authenticateToken, changeStatus)
 router.get('/getalluser', authenticateToken, getAllUsers);
 router.post('/activeInactiveUser', authenticateToken, activeInactiveUser)
 router.put('/edituser/:userId', authenticateToken, editUser)
+router.get('/userwisematch/:userId', authenticateToken, UserMatchData)
 
 export default router;

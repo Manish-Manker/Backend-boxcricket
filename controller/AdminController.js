@@ -7,12 +7,12 @@ export const getAllUsers = async (req, res) => {
     try {
         let admin = req.user.role;
 
-        if(admin !== "admin") {
+        if (admin !== "admin") {
             return res.status(403).json({
                 status: 403,
                 message: "You are not authorized to access this resource"
             });
-        } 
+        }
 
         const users = await User.find({ role: "user" });
 
@@ -48,7 +48,7 @@ export const editUser = async (req, res) => {
     try {
         let admin = req.user.role;
 
-        if(admin !== "admin") {
+        if (admin !== "admin") {
             return res.status(403).json({
                 status: 403,
                 message: "You are not authorized to access this resource"
@@ -56,7 +56,7 @@ export const editUser = async (req, res) => {
         }
 
         const { userId } = req.params;
-        const { name, email } = req.body; 
+        const { name, email } = req.body;
 
         const user = await User.findById(userId);
         if (!user) {
@@ -66,15 +66,23 @@ export const editUser = async (req, res) => {
             });
         }
 
-        user.name = name;
-        user.email = email;
-        await user.save();
+        let data = await User.updateOne({ _id: userId }, { $set: { name, email } });
 
-        res.status(200).json({
+        if(data.modifiedCount === 0) {
+            return res.status(400).json({
+                status: 400,
+                message: "User not edited"
+            });
+        }else{
+            res.status(200).json({
             status: 200,
             message: "User edited successfully"
         });
+        }
+       
+
         
+
     } catch (error) {
         console.log("Error editing user:", error);
         return res.status(500).json({
@@ -90,7 +98,7 @@ export const activeInactiveUser = async (req, res) => {
     try {
         let admin = req.user.role;
 
-        if(admin !== "admin") {
+        if (admin !== "admin") {
             return res.status(403).json({
                 status: 403,
                 message: "You are not authorized to access this resource"
@@ -124,3 +132,38 @@ export const activeInactiveUser = async (req, res) => {
     }
 };
 
+export const UserMatchData = async (req, res) => {
+    try {
+        let admin = req.user.role;
+
+        if (admin !== "admin") {
+            return res.status(403).json({
+                status: 403,
+                message: "You are not authorized to access this resource"
+            });
+        }
+
+        let userId = req?.params?.userId;
+
+        if (!userId) {
+            return res.status(400).json({
+                status: 400,
+                message: "User ID is required"
+            });
+        }
+
+        const userMatches = await Match.find({ userId }).sort({ createdAt: -1 });
+        res.json({
+            status: 200,
+            message: "User-wise matches fetched successfully",
+            data: userMatches
+        });
+    } catch (error) {
+        console.error("Error fetching user-wise matches:", error);
+        res.status(500).json({
+            status: 500,
+            message: "Error fetching user-wise matches",
+            error: error.message
+        });
+    }
+}
