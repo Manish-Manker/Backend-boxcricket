@@ -38,9 +38,9 @@ router.put('/chnageStatus', authenticateToken, changeStatus)
 
 //admin routes
 
-router.get('/getalluser', authenticateToken, getAllUsers);
+router.post('/getalluser', authenticateToken, getAllUsers);
 router.post('/activeInactiveUser', authenticateToken, activeInactiveUser)
 router.put('/edituser/:userId', authenticateToken, editUser)
-router.get('/userwisematch/:userId', authenticateToken, UserMatchData)
+router.post('/userwisematch/:userId', authenticateToken, UserMatchData)
 
 export default router;

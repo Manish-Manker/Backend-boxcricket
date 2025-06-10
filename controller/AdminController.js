@@ -14,7 +14,15 @@ export const getAllUsers = async (req, res) => {
             });
         }
 
-        const users = await User.find({ role: "user" }).sort({ createdAt: -1 });
+        let page  = req?.body?.page || 1;
+        let perPage = req?.body?.perPage || 10;
+
+        let skip = (page - 1) * perPage;
+        let limit = perPage;
+        
+        let totalUsers = await User.countDocuments({ role: "user" });
+
+        const users = await User.find({ role: "user" }).sort({ createdAt: -1 }).skip(skip).limit(limit);
 
         let data = await Promise.all(users.map(async (user) => {
             const matchCount = await Match.countDocuments({ userId: user._id });
@@ -32,7 +40,8 @@ export const getAllUsers = async (req, res) => {
         res.status(200).json({
             status: 200,
             message: "Users fetched successfully",
-            data: data
+            data: data,
+            totalUsers
         });
     } catch (error) {
         console.error("Error fetching users:", error);
@@ -68,20 +77,20 @@ export const editUser = async (req, res) => {
 
         let data = await User.updateOne({ _id: userId }, { $set: { name, email } });
 
-        if(data.modifiedCount === 0) {
+        if (data.modifiedCount === 0) {
             return res.status(400).json({
                 status: 400,
                 message: "User not edited"
             });
-        }else{
+        } else {
             res.status(200).json({
-            status: 200,
-            message: "User edited successfully"
-        });
+                status: 200,
+                message: "User edited successfully"
+            });
         }
-       
 
-        
+
+
 
     } catch (error) {
         console.log("Error editing user:", error);
@@ -152,11 +161,21 @@ export const UserMatchData = async (req, res) => {
             });
         }
 
-        const userMatches = await Match.find({ userId }).sort({ createdAt: -1 });
+        let page = req?.body?.page || 1;
+        let perPage = req?.body?.perPage || 10;
+
+        let skip = (page - 1) * perPage;
+        let limit = perPage; 
+
+        let totalData = await Match.countDocuments({ userId });
+
+        const userMatches = await Match.find({ userId }).sort({ createdAt: -1 }).skip(skip).limit(limit);
+
         res.json({
             status: 200,
             message: "User-wise matches fetched successfully",
-            data: userMatches
+            data: userMatches,
+            totalData
         });
     } catch (error) {
         console.error("Error fetching user-wise matches:", error);
