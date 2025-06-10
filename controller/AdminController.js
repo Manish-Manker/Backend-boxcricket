@@ -14,7 +14,7 @@ export const getAllUsers = async (req, res) => {
             });
         }
 
-        const users = await User.find({ role: "user" });
+        const users = await User.find({ role: "user" }).sort({ createdAt: -1 });
 
         let data = await Promise.all(users.map(async (user) => {
             const matchCount = await Match.countDocuments({ userId: user._id });
