@@ -16,13 +16,27 @@ export const getAllUsers = async (req, res) => {
 
         let page  = req?.body?.page || 1;
         let perPage = req?.body?.perPage || 10;
+        let status = req?.body?.status ;
+        let search = req?.body?.search;
 
         let skip = (page - 1) * perPage;
         let limit = perPage;
-        
-        let totalUsers = await User.countDocuments({ role: "user" });
 
-        const users = await User.find({ role: "user" }).sort({ createdAt: -1 }).skip(skip).limit(limit);
+        let where = {};
+
+        if (status) {
+            where.status = status;
+        }
+
+        if (search) {
+            where.$or = [
+                { name: { $regex: search, $options: "i" } }
+            ];
+        }
+        
+        let totalUsers = await User.countDocuments({ role: "user", ...where });
+
+        const users = await User.find({ role: "user", ...where }).sort({ createdAt: -1 }).skip(skip).limit(limit);
 
         let data = await Promise.all(users.map(async (user) => {
             const matchCount = await Match.countDocuments({ userId: user._id });

@@ -189,7 +189,22 @@ export const changeStatus = async (req, res) => {
         let status = req.body.status;
         let matchId = req.body.matchId;
 
-        let match = await Match.findOne({ userId, _id: matchId });
+        if (!matchId) {
+            return res.status(400).json({
+                status: 400,
+                message: "Match ID is required"
+            });
+        }
+
+        let where;
+        let role = req.user.role;
+        if(role === "admin") {
+            where = {};
+        } else {
+            where = { userId };
+        }
+
+        let match = await Match.findOne({ _id: matchId , ...where });
         if (match && match.status) {
             match.status = status;
 
