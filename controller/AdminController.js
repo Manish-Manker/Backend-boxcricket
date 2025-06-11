@@ -181,9 +181,17 @@ export const UserMatchData = async (req, res) => {
         let skip = (page - 1) * perPage;
         let limit = perPage; 
 
-        let totalData = await Match.countDocuments({ userId });
+        let status = req?.body?.status
 
-        const userMatches = await Match.find({ userId }).sort({ createdAt: -1 }).skip(skip).limit(limit);
+        let where =  {}
+
+        if(status) {
+            where.status = status
+        }
+
+        let totalData = await Match.countDocuments({ userId , ...where });
+
+        const userMatches = await Match.find({ userId , ...where}).sort({ createdAt: -1 }).skip(skip).limit(limit);
 
         res.json({
             status: 200,
