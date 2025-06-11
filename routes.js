@@ -14,7 +14,7 @@ import {
     changeStatus
 } from './controller/MatchController.js'
 
-import { getAllUsers, activeInactiveUser, editUser , UserMatchData } from './controller/AdminController.js'
+import { getAllUsers, activeInactiveUser, editUser , UserMatchData,TotalData } from './controller/AdminController.js'
 
 // user routes
 router.post('/signup', signup);
@@ -42,5 +42,6 @@ router.post('/getalluser', authenticateToken, getAllUsers);
 router.post('/activeInactiveUser', authenticateToken, activeInactiveUser)
 router.put('/edituser/:userId', authenticateToken, editUser)
 router.post('/userwisematch/:userId', authenticateToken, UserMatchData)
+router.get('/totalData', authenticateToken, TotalData)
 
 export default router;

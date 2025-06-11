@@ -208,3 +208,48 @@ export const UserMatchData = async (req, res) => {
         });
     }
 }
+
+export const TotalData = async(req,res)=>{
+
+    try {
+        let admin = req.user.role;
+
+        if (admin !== "admin") {            
+            return res.status(403).json({
+                status: 403,
+                message: "You are not authorized to access this resource"
+            });
+        }
+
+        let totalUsers;
+        let ActiveUsers;
+        let InActiveUsers;
+        let ToalMatches;
+
+        totalUsers = await User.countDocuments({ _id:{$ne: req.user._id} });
+        ActiveUsers = await User.countDocuments({ status: "active" , _id:{$ne: req.user._id} });
+        InActiveUsers = await User.countDocuments({ status: "inactive" , _id:{$ne: req.user._id} });
+        ToalMatches = await Match.countDocuments({ userId:{$ne: req.user._id} });
+
+        res.json({
+            status: 200,
+            message: "User-wise matches fetched successfully",
+            data:{
+                totalUsers,
+                ActiveUsers,
+                InActiveUsers,
+                ToalMatches
+            }
+        });
+
+
+    }catch (error) {
+        console.error("Error fetching user-wise matches:", error);
+        res.status(500).json({
+            status: 500,
+            message: "Error fetching user-wise matches",
+            error: error.message
+        });
+    }
+
+}
