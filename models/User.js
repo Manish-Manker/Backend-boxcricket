@@ -28,6 +28,18 @@ const userSchema = new mongoose.Schema({
     enum: ['active', 'inactive'],
     default: 'active'
   },
+  isLoggedIn: {
+    type: Boolean,
+    default: false
+  },
+  authToken:{
+    type: String,
+    default: null
+  },
+  resetToken: {
+    type: String,
+    default: null
+  },
   createdAt: {
     type: Date, 
     default: Date.now

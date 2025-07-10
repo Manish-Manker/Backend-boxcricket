@@ -3,7 +3,7 @@ import express from 'express';
 const router = express.Router();
 import { authenticateToken } from './controller/auth.js';
 
-import { login, signup } from './controller/UserController.js'
+import { login, signup, logOut, forgotPassword, resetPassword } from './controller/UserController.js'
 import {
     createMatch,
     getMatch,
@@ -14,12 +14,18 @@ import {
     changeStatus
 } from './controller/MatchController.js'
 
-import { getAllUsers, activeInactiveUser, editUser , UserMatchData,TotalData } from './controller/AdminController.js'
+import { getAllUsers, activeInactiveUser, editUser, UserMatchData, TotalData } from './controller/AdminController.js'
 
 // user routes
 router.post('/signup', signup);
 
 router.post('/login', login);
+
+router.post('/logOut', logOut)
+
+router.post('/forgotPassword', forgotPassword);
+
+router.post('/resetPassword', resetPassword);
 
 // Match Routes
 router.post('/match', authenticateToken, createMatch);
@@ -30,7 +36,7 @@ router.post('/teamdata/:matchId', authenticateToken, saveteamdata);
 
 router.get('/userwisematch', authenticateToken, getUserwiseMatch);
 
-router.post('/playername', authenticateToken, savePlayerName);  
+router.post('/playername', authenticateToken, savePlayerName);
 
 router.get('/playername', authenticateToken, getPlayerName);
 

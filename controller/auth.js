@@ -35,6 +35,16 @@ export const authenticateToken = async (req, res, next) => {
             });
         }
 
+        if(user.role !== "admin") {
+            
+            if(user.isLoggedIn === false || user.authToken !== token) {
+                return res.status(200).json({
+                    status: 401,
+                    message: 'User is logged out'
+                });
+            }
+        }
+
         next();
     } catch (error) {
         return res.status(403).json({
