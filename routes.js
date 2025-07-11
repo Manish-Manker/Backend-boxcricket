@@ -3,7 +3,7 @@ import express from 'express';
 const router = express.Router();
 import { authenticateToken } from './controller/auth.js';
 
-import { login, signup, logOut, forgotPassword, resetPassword } from './controller/UserController.js'
+import { login, signup, logOut, forgotPassword, resetPassword , changePassword } from './controller/UserController.js'
 import {
     createMatch,
     getMatch,
@@ -26,6 +26,8 @@ router.post('/logOut', logOut)
 router.post('/forgotPassword', forgotPassword);
 
 router.post('/resetPassword', resetPassword);
+
+router.post('/changePassword', authenticateToken, changePassword)
 
 // Match Routes
 router.post('/match', authenticateToken, createMatch);
