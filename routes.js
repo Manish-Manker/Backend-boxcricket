@@ -14,7 +14,7 @@ import {
     changeStatus
 } from './controller/MatchController.js'
 
-import { getAllUsers, activeInactiveUser, editUser, UserMatchData, TotalData } from './controller/AdminController.js'
+import { getAllUsers, activeInactiveUser, editUser, UserMatchData, TotalData ,changeLoginStatus } from './controller/AdminController.js'
 
 // user routes
 router.post('/signup', signup);
@@ -27,7 +27,9 @@ router.post('/forgotPassword', forgotPassword);
 
 router.post('/resetPassword', resetPassword);
 
-router.post('/changePassword', authenticateToken, changePassword)
+router.post('/changePassword', authenticateToken, changePassword);
+
+router.post('/changeLoginStatus', authenticateToken, changeLoginStatus)
 
 // Match Routes
 router.post('/match', authenticateToken, createMatch);
