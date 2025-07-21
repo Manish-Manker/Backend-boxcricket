@@ -3,9 +3,10 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import * as dotenv from 'dotenv';
 import routes from './routes.js';
+import stripeWebhookRoutes from './controller/stripWebhook.js';
 
 import morgan from "morgan";
-import moment from 'moment-timezone'; 
+import moment from 'moment-timezone';
 
 dotenv.config();
 
@@ -19,12 +20,13 @@ app.use(morgan(':remote-addr - :remote-user [:date] ":method :url HTTP/:http-ver
 
 // Middleware
 app.use(cors());
+app.use('/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 
 // Connect to MongoDB
 try {
     await mongoose.connect(process.env.MONGODB_URI, {
-        dbName: 'pixascore', 
+        dbName: 'pixascore',
         useNewUrlParser: true,
         useUnifiedTopology: true
     });
@@ -36,6 +38,7 @@ try {
 
 // Routes
 app.use('/api', routes);
+app.use('/webhook', stripeWebhookRoutes);
 
 // Global error handling middleware 
 app.use((err, req, res, next) => {

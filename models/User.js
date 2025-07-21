@@ -32,7 +32,15 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  authToken:{
+  isemailVerified: {
+    type: Boolean,
+    default: false
+  },
+  isDemoCompleted: {
+    type: Boolean,
+    default: false
+  },
+  authToken: {
     type: String,
     default: null
   },
@@ -40,21 +48,45 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  subscription: {
+    id: {
+      type: String,
+      default: null
+    },
+    status: {
+      type: String,
+      default: null
+    },
+    plan: {
+      type: String,
+      default: null
+    },
+    amount: {
+      type: String,
+      default: null
+    },
+    currency: {
+      type: String,
+      default: null
+    },
+    createdAt: String,
+    expiresAt: String,
+  },
   createdAt: {
-    type: Date, 
+    type: Date,
     default: Date.now
   }
 });
 
 
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
   if (this.isModified('password')) {
     this.password = await bcrypt.hash(this.password, 8);
   }
   next();
 });
 
-userSchema.methods.comparePassword = async function(candidatePassword) {
+userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 

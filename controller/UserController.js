@@ -1,9 +1,7 @@
 
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-
-import nodemailer from 'nodemailer';
-import mandrillTransport from 'mandrill-nodemailer-transport';
+import { sendEmail } from '../utils/sendMail.js';
 
 export const signup = async (req, res) => {
     const JWT_SECRET = process.env.JWT_SECRET;
@@ -21,16 +19,33 @@ export const signup = async (req, res) => {
         if (existingUser) {
             return res.status(400).json({
                 status: 400,
-                message: 'User already exists with this email'
+                message: 'User already exists'
             });
         }
 
         const user = new User({ name, email, password });
         await user.save();
 
+        const token = jwt.sign(
+            { userId: user._id, email: user.email },
+            JWT_SECRET,
+            { expiresIn: '366d' }
+        );
+
+        // let mailData = await sendEmail('verifyEmail', 'manish.manker@pixelnx.com', 'PixaScore Verify your email address', token);
+
+        // if (!mailData) {
+        //     return res.status(500).json({
+        //         status: 500,
+        //         message: 'Error sending email'
+        //     });
+        // }
+
+
         res.status(201).json({
             status: 201,
-            message: 'User created successfully'
+            message: 'Validation email sent successfully to your email address',
+            token,
         });
     } catch (error) {
         console.error('Signup error:', error);
@@ -75,6 +90,13 @@ export const login = async (req, res) => {
                 return res.status(401).json({
                     status: 401,
                     message: 'User is already logged in'
+                });
+            }
+
+            if (user.isemailVerified === false) {
+                return res.status(401).json({
+                    status: 401,
+                    message: 'Email is not verified. Check your email for verification link'
                 });
             }
         }
@@ -162,6 +184,42 @@ export const logOut = async (req, res) => {
     }
 };
 
+
+export const changeIsDemoCompleted = async (req, res) => {
+    let userId = req.user._id;
+    if (!userId) {
+        console.log('User ID is required to update isDemoCompleted');  
+        res.status(400).json({
+            status: 400,
+            message: 'User ID is required to update isDemoCompleted'
+        });
+        return;
+    }
+    try {
+        await User.updateOne({ _id: userId }, { $set: { isDemoCompleted: true } }).then(() => {
+            res.status(200).json({
+                status: 200,
+                message: 'isDemoCompleted updated successfully'
+            });
+        }).catch((error) => {
+            console.error('Error updating isDemoCompleted:', error);
+            res.status(500).json({
+                status: 500,
+                message: 'Error updating isDemoCompleted',
+                error: error.message
+            });
+        });
+
+    } catch (error) {
+        console.error('Error updating isDemoCompleted:', error);
+        res.status(500).json({
+            status: 500,
+            message: 'Error updating isDemoCompleted',
+            error: error.message
+        });
+    }
+}
+
 export const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
@@ -183,7 +241,7 @@ export const forgotPassword = async (req, res) => {
 
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '10m' });
 
-        // let mailData = await sendMail('manish.manker@pixelnx.com', token);
+        // let mailData = await sendEmail('resetPassword','manish.manker@pixelnx.com','PixaScore Password Reset Link' , token);
 
         // if (!mailData) {
         //     return res.status(500).json({
@@ -333,81 +391,84 @@ export const resetPassword = async (req, res) => {
     }
 }
 
-
-
-const sendMail = async (to, link) => {
-    const mailHtml = `
-        <div  style="margin: 50px auto 0; padding: 30px; background-color: #f5f5f5; font-family: Arial, sans-serif; width: fit-content; border-radius: 5px;">
-        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 0; ">
-            <tr>
-                <td align="center">
-                    <table width="600" cellpadding="0" cellspacing="0"
-                        style="background-color: #ffffff; padding: 40px; text-align: center; border-radius: 5px;">
-                        <!-- Logo -->
-                        <tr>
-                            <td style="padding-bottom: 30px;">
-                                
-                            </td>
-                        </tr>
- 
- 
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <h4 style="font-size:26px; font-weight:700; margin:0 0 10px; color:#444a64;">
-                                        Password Reset</h4>
-                                    <p style="font-size:17px; font-weight:400; margin:15px 40px 20px; color:#69767A; line-height: 24px;">If you’ve lost your password or wish to
-                                        reset it, use the link below to get started.</p>
- 
-                                    <div> <a href="http://localhost:3000/resetPassword?${link}" target="_blank"
-                                            style="display:inline-block; background:#ff9c4a; color:#fff; padding:12px 24px; border-radius:30px; text-decoration:none; font-weight:bold; font-size:16px;">Reset
-                                            Your Password</a></div>
-                                    <p style="font-size:15px; font-weight:400; color:#69767A; margin:20px 0 20px; line-height: 24px;">If
-                                        you did not request a password
-                                        reset, you can safely ignore this email. Only
-                                        a person with access to your email can reset your account password.</p>
-                                </td>
-                            </tr>
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td
-                                    style=" text-align:center; color:#444a64; font-size:14px; font-weight: 600; padding:15px 0px 0px ;">
-                                    © 2025 PixaScore. All Rights Reserved.
-                                </td>
-                            </tr>
-                        </tfoot>
- 
- 
-                    </table>
-                </td>
-            </tr>
-        </table>
-    </div>
-    `;
-
+export const verifyEmail = async (req, res) => {
     try {
-        var transport = nodemailer.createTransport({
-            host: process.env.MandrillHost,
-            port: 587,
-            secure: false,
-            auth: {
-                user: process.env.MandrillUser,
-                pass: process.env.MandrillPass,
-            },
-        })
-        const mailOptions = {
-            from: 'support@pixascore.com',
-            to: 'manish.manker@pixelnx.com',
-            subject: "PixaScore Password Reset Link",
-            html: mailHtml,
-        };
+        const token = req.body?.token;
 
-        const info = await transport.sendMail(mailOptions);
-        console.log('Email sent successfully:', info);
-        return true;
+        if (!token) {
+            return res.status(400).json({
+                status: 400,
+                message: 'Token is required'
+            });
+        }
+
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (err) {
+            if (err.name === 'TokenExpiredError') {
+                return res.status(400).json({
+                    status: 400,
+                    message: 'Email verification link has expired'
+                });
+            } else {
+                return res.status(400).json({
+                    status: 400,
+                    message: 'Invalid token'
+                });
+            }
+        }
+
+        const user = await User.findOne({ _id: decoded.userId });
+
+        if (!user) {
+            return res.status(404).json({
+                status: 404,
+                message: 'User not found'
+            });
+        }
+
+        if (user.isemailVerified) {
+            return res.status(202).json({
+                status: 202,
+                message: 'Email is already verified'
+            });
+        }
+
+
+        const JWT_SECRET = process.env.JWT_SECRET;
+
+        const sendToken = jwt.sign(
+            { userId: user._id, email: user.email },
+            JWT_SECRET,
+            { expiresIn: '366d' }
+        );
+
+        await User.updateOne({ _id: user._id }, { $set: { isLoggedIn: true, authToken: sendToken, isemailVerified: true } });
+
+        res.status(200).json({
+            status: 200,
+            message: 'Email verified successfully',
+            token: sendToken,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
+
     } catch (error) {
-        console.error('Error sending email:', error);
-        return false;
+        console.log('Verify email error:', error);
+        res.status(500).json({
+            status: 500,
+            message: 'Error verifying email',
+            error: error.message
+        });
+
     }
-};
+}
+
+
+
+

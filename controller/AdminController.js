@@ -45,10 +45,11 @@ export const getAllUsers = async (req, res) => {
                 _id: user._id,
                 name: user.name,
                 email: user.email,
+                emailVerified: user?.isemailVerified,
                 role: user.role,
                 status: user.status,
                 createdAt: user.createdAt,
-                isLoggedIn: user.isLoggedIn,
+                isLoggedIn: user?.isLoggedIn,
                 matchCount
             };
         }));
@@ -87,6 +88,7 @@ export const editUser = async (req, res) => {
 
         const user = await User.findById(userId);
         if (!user) {
+            console.log("User not found:", userId);
             return res.status(404).json({
                 status: 404,
                 message: "User not found"
@@ -95,7 +97,7 @@ export const editUser = async (req, res) => {
 
         let updateData = {};
         updateData.name = name;
-        updateData.email = email;
+        // updateData.email = email;
         if (password) {
             const hashedPassword = await bcrypt.hash(password, 8);
             updateData.password = hashedPassword;
@@ -119,8 +121,6 @@ export const editUser = async (req, res) => {
             message: "User edited successfully",
             data
         });
-
-
 
     } catch (error) {
         console.log("Error editing user:", error);
@@ -279,12 +279,14 @@ export const TotalData = async (req, res) => {
         let totalUsers;
         let ActiveUsers;
         let InActiveUsers;
-        let ToalMatches;
+        let TotalMatches;
+        let LogedInUsers;
 
         totalUsers = await User.countDocuments({ _id: { $ne: req.user._id } });
         ActiveUsers = await User.countDocuments({ status: "active", _id: { $ne: req.user._id } });
         InActiveUsers = await User.countDocuments({ status: "inactive", _id: { $ne: req.user._id } });
-        ToalMatches = await Match.countDocuments({ userId: { $ne: req.user._id } });
+        TotalMatches = await Match.countDocuments({ userId: { $ne: req.user._id } });
+        LogedInUsers = await User.countDocuments({ isLoggedIn: true, _id: { $ne: req.user._id } });
 
         res.json({
             status: 200,
@@ -293,7 +295,8 @@ export const TotalData = async (req, res) => {
                 totalUsers,
                 ActiveUsers,
                 InActiveUsers,
-                ToalMatches
+                TotalMatches,
+                LogedInUsers
             }
         });
 
