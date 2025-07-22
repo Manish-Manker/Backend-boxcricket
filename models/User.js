@@ -53,6 +53,10 @@ const userSchema = new mongoose.Schema({
       type: String,
       default: null
     },
+    customerId: {
+      type: String,
+      default: null
+    },
     status: {
       type: String,
       default: null
@@ -65,12 +69,22 @@ const userSchema = new mongoose.Schema({
       type: String,
       default: null
     },
+    hosted_invoice_url: {
+      type: String,
+      default: null
+    },
     currency: {
       type: String,
       default: null
     },
-    createdAt: String,
-    expiresAt: String,
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+    expiresAt: {
+      type: Date,
+      default: null
+    }
   },
   createdAt: {
     type: Date,

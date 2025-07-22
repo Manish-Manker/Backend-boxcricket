@@ -50,6 +50,7 @@ export const getAllUsers = async (req, res) => {
                 status: user.status,
                 createdAt: user.createdAt,
                 isLoggedIn: user?.isLoggedIn,
+                plan: user?.subscription?.plan,
                 matchCount
             };
         }));

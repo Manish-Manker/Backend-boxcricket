@@ -62,9 +62,16 @@ export const authenticateToken = async (req, res, next) => {
                     user?.subscription.status === "paid" &&
                     (user?.subscription.amount == 9.99 || user?.subscription.amount == 19.99)
                 ) {
-                    // Continue as user has a valid paid plan
-                    console.log("User has a valid paid plan. Proceeding with request.");
-                    
+                    let expiresAt = user?.subscription?.expiresAt;
+                    if (expiresAt && new Date(expiresAt).getTime() < Date.now()) {
+                        console.log("User's subscription has expired. Please renew your subscription.");
+                        return res.status(200).json({
+                            status: 301,
+                            message: 'Your subscription has expired. Please renew your subscription'
+                        });
+                    }
+
+                    console.log("User has a valid paid plan. Proceeding with request.");                    
                 } else {
                     console.log("Demo is already completed. Please purchase the plan to continue.");
                     return res.status(200).json({

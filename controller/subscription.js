@@ -29,7 +29,7 @@ export const paymentRoutes = async (req, res) => {
             ],
             customer_email: userEmail,
             success_url: `${req.headers.origin}/input`,
-            cancel_url: `${req.headers.origin}/cancel`,
+            cancel_url: `${req.headers.origin}/`,
             metadata: {
                 userId: userId, 
             },
