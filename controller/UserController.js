@@ -188,7 +188,7 @@ export const logOut = async (req, res) => {
 export const changeIsDemoCompleted = async (req, res) => {
     let userId = req.user._id;
     if (!userId) {
-        console.log('User ID is required to update isDemoCompleted');  
+        console.log('User ID is required to update isDemoCompleted');
         res.status(400).json({
             status: 400,
             message: 'User ID is required to update isDemoCompleted'
@@ -271,13 +271,6 @@ export const changePassword = async (req, res) => {
     try {
         const { password } = req.body;
 
-        if (!password) {
-            return res.status(400).json({
-                status: 400,
-                message: 'Password is required'
-            });
-        }
-
         const user = await User.findOne({ _id: req.user._id });
 
         if (!user) {
@@ -294,19 +287,21 @@ export const changePassword = async (req, res) => {
             });
         }
 
-        if (await user.comparePassword(password)) {
-            return res.status(400).json({
-                status: 400,
-                message: 'New password should be different from old password'
-            });
+        if (password) {
+            if (await user.comparePassword(password)) {
+                return res.status(400).json({
+                    status: 400,
+                    message: 'New password should be different from old password'
+                });
+            }
+            user.password = password;
         }
-
-        user.password = password;
+        user.name = req.body?.fullname
         await user.save();
 
         res.status(200).json({
             status: 200,
-            message: 'Password changed successfully'
+            message: 'User Data changed successfully'
         });
 
     } catch (error) {
@@ -463,6 +458,39 @@ export const verifyEmail = async (req, res) => {
         res.status(500).json({
             status: 500,
             message: 'Error verifying email',
+            error: error.message
+        });
+
+    }
+}
+
+export const getactivePlan = async (req, res) => {
+    try {
+        let userId = req.user._id;
+
+        let data = await User.findOne({ _id: userId });
+
+        if (!data) {
+            return res.status(404).json({
+                status: 404,
+                message: 'User not found'
+            });
+        }
+
+        let activePlan = data.subscription?.plan || null;
+
+        return res.status(200).json({
+            status: 200,
+            activePlan,
+            message: 'Active plan fetched successfully',
+            activePlan
+        });
+
+    } catch (error) {
+        console.error('Get active plan error:', error);
+        res.status(500).json({
+            status: 500,
+            message: 'Error fetching active plan',
             error: error.message
         });
 

@@ -3,7 +3,7 @@ import express from 'express';
 import Stripe from 'stripe';
 import dotenv from 'dotenv';
 import User from '../models/User.js';
-import { sendEmail } from '../utils/SendMail.js';
+// import { sendEmail } from '../utils/SendMail.js';
 
 dotenv.config();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY + '');

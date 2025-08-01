@@ -19,7 +19,7 @@ app.use(morgan(':remote-addr - :remote-user [:date] ":method :url HTTP/:http-ver
 
 
 // Middleware
-app.use(cors());
+app.use(cors('*'));
 app.use('/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 

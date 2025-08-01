@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
 import dotenv from 'dotenv';
+import User from '../models/User.js'
 
 dotenv.config();
 
@@ -11,11 +12,21 @@ export const paymentRoutes = async (req, res) => {
     const priceId = req.body?.priceId;
     const userEmail = req.body?.userEmail;
     const userId = req.body?.userId;
+    let planeName = req.body?.planeName;
     
     if (!priceId) {
         console.log('Price ID is required');
         return res.status(200).json({ status: 400, message: 'Price ID is required' });
     }
+
+    let existingPlan = await User.findOne({ _id: userId });
+
+    if (existingPlan && existingPlan.subscription && existingPlan.subscription.plan === planeName) {
+        console.log('User already has this subscription:', existingPlan.subscription.id);
+        return res.status(200).json({ status: 400, message: 'User already has this subscription' });
+    }
+
+    
 
     try {
         const session = await stripe.checkout.sessions.create({

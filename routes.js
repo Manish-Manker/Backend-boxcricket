@@ -3,7 +3,7 @@ import express from 'express';
 const router = express.Router();
 import { authenticateToken } from './controller/auth.js';
 
-import { login, signup, logOut, forgotPassword, resetPassword, changePassword, verifyEmail , changeIsDemoCompleted } from './controller/UserController.js'
+import { login, signup, logOut, forgotPassword, resetPassword, changePassword, verifyEmail, changeIsDemoCompleted, getactivePlan } from './controller/UserController.js'
 import {
     createMatch,
     getMatch,
@@ -62,5 +62,7 @@ router.post('/userwisematch/:userId', authenticateToken, UserMatchData)
 router.get('/totalData', authenticateToken, TotalData)
 
 router.post('/createSubscriptionSession', paymentRoutes);
+
+router.get('/active_plan', authenticateToken, getactivePlan);
 
 export default router;
