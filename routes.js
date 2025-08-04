@@ -1,7 +1,7 @@
 import express from 'express';
 
 const router = express.Router();
-import { authenticateToken } from './controller/auth.js';
+import { authenticateToken } from './middleware/auth.js';
 
 import { login, signup, logOut, forgotPassword, resetPassword, changePassword, verifyEmail, changeIsDemoCompleted, getactivePlan } from './controller/UserController.js'
 import {
@@ -17,6 +17,9 @@ import {
 import { getAllUsers, activeInactiveUser, editUser, UserMatchData, TotalData, changeLoginStatus } from './controller/AdminController.js'
 
 import { paymentRoutes } from './controller/subscription.js';
+
+import { uploadLogo , getLogos, deleteLogo } from './controller/LogoUpload.js';
+import { upload } from './middleware/uploadMiddleware.js';
 
 // user routes
 router.post('/signup', signup);
@@ -64,5 +67,10 @@ router.get('/totalData', authenticateToken, TotalData)
 router.post('/createSubscriptionSession', paymentRoutes);
 
 router.get('/active_plan', authenticateToken, getactivePlan);
+
+router.post('/upload', authenticateToken, upload, uploadLogo);
+router.get('/getimages', authenticateToken, getLogos);
+router.delete('/deleteImages', authenticateToken, deleteLogo);
+
 
 export default router;

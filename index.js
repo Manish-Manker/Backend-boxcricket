@@ -4,7 +4,7 @@ import cors from 'cors';
 import * as dotenv from 'dotenv';
 import routes from './routes.js';
 import stripeWebhookRoutes from './controller/stripWebhook.js';
-
+import path from 'path';
 import morgan from "morgan";
 import moment from 'moment-timezone';
 
@@ -22,6 +22,9 @@ app.use(morgan(':remote-addr - :remote-user [:date] ":method :url HTTP/:http-ver
 app.use(cors('*'));
 app.use('/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
+
+const __dirname = path.resolve(); 
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Connect to MongoDB
 try {
