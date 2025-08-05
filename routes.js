@@ -18,8 +18,8 @@ import { getAllUsers, activeInactiveUser, editUser, UserMatchData, TotalData, ch
 
 import { paymentRoutes } from './controller/subscription.js';
 
-import { uploadLogo , getLogos, deleteLogo } from './controller/LogoUpload.js';
-import { upload } from './middleware/uploadMiddleware.js';
+import { uploadLogo ,  deleteLogo } from './controller/LogoUpload.js';
+import upload  from './middleware/uploadMiddleware.js';
 
 // user routes
 router.post('/signup', signup);
@@ -68,8 +68,10 @@ router.post('/createSubscriptionSession', paymentRoutes);
 
 router.get('/active_plan', authenticateToken, getactivePlan);
 
-router.post('/upload', authenticateToken, upload, uploadLogo);
-router.get('/getimages', authenticateToken, getLogos);
+router.post('/upload', authenticateToken, upload.any(), uploadLogo);
+
+// router.get('/getimages', authenticateToken, getLogos);
+
 router.delete('/deleteImages', authenticateToken, deleteLogo);
 
 
